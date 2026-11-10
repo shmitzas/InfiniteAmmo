@@ -95,21 +95,14 @@ public partial class PluginName : BasePlugin
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SwiftlyS2.CS2" Version="*" />
-    <!-- MS Extensions — always exclude runtime assets -->
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="*"
-                      ExcludeAssets="runtime" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="*"
-                      ExcludeAssets="runtime" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="*"
-                      ExcludeAssets="runtime" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="*"
-                      ExcludeAssets="runtime" PrivateAssets="all" />
+    <!-- No direct Microsoft.Extensions.* references: SwiftlyS2.CS2 brings them at the version SwiftlyS2
+         itself builds against, and pinning them here fails restore (NU1605) whenever the SDK raises them. -->
+    <PackageReference Include="SwiftlyS2.CS2" Version="*" ExcludeAssets="runtime" PrivateAssets="all" />
   </ItemGroup>
 </Project>
 ```
 
-> **IMPORTANT**: All `Microsoft.Extensions.*` packages must use `ExcludeAssets="runtime" PrivateAssets="all"` since the runtime already provides them.
+> **IMPORTANT**: Never reference `Microsoft.Extensions.*` packages directly — `SwiftlyS2.CS2` brings them in, and a pinned version fails restore with `NU1605` (package downgrade) as soon as SwiftlyS2 raises its own. `SwiftlyS2.CS2` itself uses `ExcludeAssets="runtime" PrivateAssets="all"`: the host provides it, and the exclusion carries over to the `Microsoft.Extensions.*` packages it brings in.
 
 ---
 
